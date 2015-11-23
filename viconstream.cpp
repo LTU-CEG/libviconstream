@@ -21,3 +21,17 @@
 
 #include "Client.h"
 #include "viconstream.h"
+
+namespace test
+{
+
+class myClass
+{
+
+public:
+    myClass()
+    {
+    }
+};
+
+}
