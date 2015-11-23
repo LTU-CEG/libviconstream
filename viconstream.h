@@ -18,7 +18,23 @@
 *
 ****************************************************************************/
 
+#include "Client.h"
+
 #ifndef _VICONSTREAM_H
 #define _VICONSTREAM_H
+
+namespace ViconStream
+{
+    class ViconStream;
+}
+
+class ViconStream::ViconStream
+{
+private:
+
+public:
+    ViconStream();
+    ~ViconStream();
+};
 
 #endif

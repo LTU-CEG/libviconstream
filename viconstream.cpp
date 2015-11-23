@@ -19,19 +19,19 @@
 ****************************************************************************/
 
 
-#include "Client.h"
 #include "viconstream.h"
 
-namespace test
+using namespace ViconDataStreamSDK::CPP;
+
+namespace ViconStream
 {
 
-class myClass
-{
-
-public:
-    myClass()
+    ViconStream::ViconStream()
     {
     }
-};
+
+    ViconStream::~ViconStream()
+    {
+    }
 
 }
