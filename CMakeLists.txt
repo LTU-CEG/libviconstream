@@ -39,7 +39,8 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(HOST_ARCH linux32)
 else()
     message(FATAL_ERROR "Configuration error: Unable to detect if 64 or 32-bit.
-    CMAKE_SIZEOF_VOID_P is not 4 or 8: CMAKE_SIZEOF_VOID_P=" ${CMAKE_SIZEOF_VOID_P})
+    CMAKE_SIZEOF_VOID_P is not 4 or 8: CMAKE_SIZEOF_VOID_P="
+    ${CMAKE_SIZEOF_VOID_P})
 endif()
 
 ########################################

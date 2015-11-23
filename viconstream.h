@@ -18,10 +18,17 @@
 *
 ****************************************************************************/
 
+#include <string>
+#include <vector>
+
+#include <thread>
+
 #include "Client.h"
 
 #ifndef _VICONSTREAM_H
 #define _VICONSTREAM_H
+
+using namespace ViconDataStreamSDK::CPP;
 
 namespace ViconStream
 {
@@ -31,10 +38,22 @@ namespace ViconStream
 class ViconStream::ViconStream
 {
 private:
+    Client _vicon_client;
+    std::string _host_name;
+    std::ostream &_log;
+    std::thread _frame_grabber;
+    volatile bool shutdown;
+
+    void viconFrameGrabberWorker();
 
 public:
-    ViconStream();
+    ViconStream(std::string hostname, std::ostream &log);
     ~ViconStream();
+    bool enableStream(bool enableSegmentData,
+                      bool enableMarkerData,
+                      bool enableUnlabeledMarkerData,
+                      bool enableDeviceData,
+                      StreamMode::Enum streamMode);
 };
 
 #endif
