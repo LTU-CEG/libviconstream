@@ -19,7 +19,7 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(HOST_ARCH linux32)
 else()
     message(FATAL_ERROR "Configuration error: Unable to detect if 64 or 32-bit.
-    CMAKE_SIZEOF_VOID_P is not 4 or 8: CMAKE_SIZEOF_VOID_P="${CMAKE_SIZEOF_VOID_P})
+    CMAKE_SIZEOF_VOID_P is not 4 or 8: CMAKE_SIZEOF_VOID_P=" ${CMAKE_SIZEOF_VOID_P})
 endif()
 
 ########################################
@@ -31,12 +31,12 @@ else()
     set(VICON_SDK_PATH lib/Linux_DataStreamSDK1_5/Linux32-boost-1.53.0)
 endif()
 
-file(GLOB_RECURSE VICON_SDK ${VICON_SDK_PATH}/libViconDataStreamSDK_CPP.*)
-file(GLOB_RECURSE VICON_DEBUG ${VICON_SDK_PATH}/libDebug*)
+file(GLOB_RECURSE VICON_SDK     ${VICON_SDK_PATH}/libViconDataStreamSDK_CPP.*)
+file(GLOB_RECURSE VICON_DEBUG   ${VICON_SDK_PATH}/libDebug*)
 file(GLOB_RECURSE VICON_BTHREAD ${VICON_SDK_PATH}/libboost_thread*)
-file(GLOB_RECURSE VICON_BUT ${VICON_SDK_PATH}/libboost_unit_test*)
-file(GLOB_RECURSE VICON_BSYS ${VICON_SDK_PATH}/libboost_system*)
-file(GLOB_RECURSE VICON_BLOC ${VICON_SDK_PATH}/libboost_locale*)
+file(GLOB_RECURSE VICON_BUT     ${VICON_SDK_PATH}/libboost_unit_test*)
+file(GLOB_RECURSE VICON_BSYS    ${VICON_SDK_PATH}/libboost_system*)
+file(GLOB_RECURSE VICON_BLOC    ${VICON_SDK_PATH}/libboost_locale*)
 
 ########################################
 # Library linking and source
