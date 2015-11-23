@@ -1,0 +1,7 @@
+# Ignore tags file
+tags
+
+# Ignore . files
+.*
+test
+doc/html
