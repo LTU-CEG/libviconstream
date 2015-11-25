@@ -109,6 +109,7 @@ namespace ViconStream
             }
             else
             {
+                logString("Success! Connected to " + _host_name);
                 break;
             }
 
