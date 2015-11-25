@@ -19,22 +19,62 @@
 ****************************************************************************/
 
 #include <iostream>
+#include <chrono>
+#include <sstream>
+#include <iomanip>
 #include "viconstream.h"
 
 
 namespace ViconStream
 {
+    /*********************************
+     * Private members
+     ********************************/
+
+    void ViconStream::logString(const std::string log)
+    {
+        /* Check the execution time. */
+        auto tp = std::chrono::high_resolution_clock::now();
+        auto diff = std::chrono::duration_cast<std::chrono::duration<double>>
+            (tp - _tp_start).count();
+
+        /* Convert to desired format (6 decimals). */
+        std::stringstream s;
+
+        s << std::fixed <<
+            std::setprecision(std::numeric_limits<double>::digits10) << diff;
+
+        /* Convert to string. */
+        std::string res = s.str();
+        size_t dotIndex = res.find(".");
+        res = res.substr(0, dotIndex + 7);
+
+        /* Lock the log output. */
+        std::lock_guard<std::mutex> locker(_log_lock);
+
+        /* Send it to the log ostream. */
+        _log << "[" <<  res << "] ViconLog: " << log << std::endl;
+    }
+
     void ViconStream::viconFrameGrabberWorker()
     {
+        logString("Frame grabber thread started!");
+
         while (!shutdown)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
 
-    ViconStream::ViconStream(std::string hostname, std::ostream &log)
-        : _host_name(hostname), _log(log)
+
+    /*********************************
+     * Public members
+     ********************************/
+
+    ViconStream::ViconStream(std::string hostname, std::ostream &log_output)
+        : _host_name(hostname), _log(log_output)
     {
+        _tp_start = std::chrono::high_resolution_clock::now();
         shutdown = false;
     }
 
@@ -48,16 +88,23 @@ namespace ViconStream
                                    bool enableDeviceData,
                                    StreamMode::Enum streamMode)
     {
-        _log << "Connecting to " << _host_name << "..." << std::endl;
+        logString("Connecting to " + _host_name + "...");
 
         int cnt = 0;
 
         /* Try to connect to the Vicon host. */
         while(!_vicon_client.IsConnected().Connected)
         {
+            /* Connection failed. */
+            if (cnt >= 3)
+            {
+                logString("Error: Connection failed, aborting!");
+                return false;
+            }
+
             if (_vicon_client.Connect( _host_name ).Result != Result::Success)
             {
-                _log << "Warning: Connection failed, retrying..." << std::endl;
+                logString("Warning: Connection failed, retrying...");
                 cnt++;
             }
             else
@@ -65,52 +112,67 @@ namespace ViconStream
                 break;
             }
 
-            /* Connection failed. */
-            if (cnt >= 3)
-            {
-                _log << "Error: Connection failed, aborting!" << std::endl;
-                return false;
-            }
-
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
 
-        /* Connection established, apply settings. */
+        /*
+         * Connection established, apply settings.
+         */
 
-        /* Enable data */
+        /* Enable data based on the selected inputs. */
         if (enableSegmentData)
         {
             _vicon_client.EnableSegmentData();
-            _log << "Segment Data enabled." << std::endl;
+            logString("Segment Data enabled.");
+        }
+        else
+        {
+            _vicon_client.DisableSegmentData();
+            logString("Segment Data disabled.");
         }
 
         if (enableMarkerData)
         {
             _vicon_client.EnableMarkerData();
-            _log << "Marker Data enabled." << std::endl;
+            logString("Marker Data enabled.");
+        }
+        else
+        {
+            _vicon_client.DisableMarkerData();
+            logString("Marker Data disabled.");
         }
 
         if (enableUnlabeledMarkerData)
         {
             _vicon_client.EnableUnlabeledMarkerData();
-            _log << "Unlabeled Marker Data enabled." << std::endl;
+            logString("Unlabeled Marker Data enabled.");
+        }
+        else
+        {
+            _vicon_client.DisableUnlabeledMarkerData();
+            logString("Unlabeled Marker Data disabled.");
         }
 
         if (enableDeviceData)
         {
             _vicon_client.EnableDeviceData();
-            _log << "Device Data enabled." << std::endl;
+            logString("Device Data enabled.");
+        }
+        else
+        {
+            _vicon_client.DisableDeviceData();
+            logString("Device Data disabled.");
         }
 
         /* Set stream mode */
         _vicon_client.SetStreamMode(streamMode);
 
         if (streamMode == StreamMode::ServerPush)
-            _log << "Stream mode is ServerPush." << std::endl;
+            logString("Stream mode is ServerPush.");
         else if (streamMode == StreamMode::ClientPull)
-            _log << "Stream mode is ClientPull." << std::endl;
+            logString("Stream mode is ClientPull.");
         else
-            _log << "Stream mode is ClientPullPreFetch." << std::endl;
+            logString("Stream mode is ClientPullPreFetch.");
 
         /* Set axis mapping (Z up) */
         _vicon_client.SetAxisMapping(Direction::Forward,
@@ -118,8 +180,6 @@ namespace ViconStream
                                      Direction::Up);
 
         /* Testing the frame grabber. */
-        _log << "Testing the frame grabber...";
-
         Output_GetFrame f;
 
         for (int i = 0; i < 10; i++)
@@ -128,18 +188,19 @@ namespace ViconStream
 
             if (f.Result == Result::Success)
             {
-                _log << "OK!" << std::endl;
                 break;
             }
             else
             {
+                /* Wait a little to not overload the thread. */
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(10)
                 );
 
+                /* Checking if end of look. */
                 if (i == 9)
                 {
-                    _log << "Failed, aborting!" << std::endl;
+                    logString("Frame grabber startup failed, aborting!");
                     _vicon_client.Disconnect();
 
                     return false;
@@ -148,9 +209,17 @@ namespace ViconStream
         }
 
         /* Start the frame grabber/data pump thread. */
+        logString("Starting the frame grabber thread...");
         _frame_grabber = std::thread(&ViconStream::_frame_grabber, this);
 
         return true;
     }
 
+    void ViconStream::disableStream()
+    {
+        if (_vicon_client.IsConnected().Connected)
+        {
+            _vicon_client.Disconnect();
+        }
+    }
 }

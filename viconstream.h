@@ -18,11 +18,16 @@
 *
 ****************************************************************************/
 
+/* Data includes. */
 #include <string>
 #include <vector>
 
+/* Threading includes. */
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
+/* Vicon include. */
 #include "Client.h"
 
 #ifndef _VICONSTREAM_H
@@ -37,23 +42,29 @@ namespace ViconStream
 
 class ViconStream::ViconStream
 {
+
 private:
     Client _vicon_client;
     std::string _host_name;
+    std::chrono::high_resolution_clock::time_point _tp_start;
     std::ostream &_log;
+    std::mutex _log_lock;
     std::thread _frame_grabber;
     volatile bool shutdown;
 
+    void logString(const std::string log);
     void viconFrameGrabberWorker();
 
 public:
-    ViconStream(std::string hostname, std::ostream &log);
+    ViconStream(std::string hostname, std::ostream &log_output);
     ~ViconStream();
-    bool enableStream(bool enableSegmentData,
-                      bool enableMarkerData,
-                      bool enableUnlabeledMarkerData,
-                      bool enableDeviceData,
-                      StreamMode::Enum streamMode);
+    bool enableStream(bool enableSegmentData = true,
+                      bool enableMarkerData = false,
+                      bool enableUnlabeledMarkerData = false,
+                      bool enableDeviceData = false,
+                      StreamMode::Enum streamMode = StreamMode::ServerPush);
+    void disableStream();
+
 };
 
 #endif

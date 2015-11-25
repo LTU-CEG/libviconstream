@@ -23,7 +23,7 @@ cmake_minimum_required(VERSION 2.8.3)
 ########################################
 # Project name
 ########################################
-project(vicon_stream)
+project(viconstream)
 
 ########################################
 # Enable C++14 and other C++ flags
@@ -62,9 +62,14 @@ file(GLOB_RECURSE VICON_BLOC    ${VICON_SDK_PATH}/libboost_locale*)
 ########################################
 # Library linking and source
 ########################################
-add_library(vicon_stream SHARED viconstream.cpp)
-target_link_libraries(vicon_stream ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
+add_library(viconstream SHARED viconstream.cpp)
+target_link_libraries(viconstream ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
     ${VICON_BSYS} ${VICON_BLOC})
+
+########################################
+# Include the example in the build
+########################################
+add_subdirectory(example)
 
 ########################################
 # Messages
