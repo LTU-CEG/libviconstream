@@ -21,6 +21,7 @@
 /* Data includes. */
 #include <string>
 #include <vector>
+#include <queue>
 
 /* Threading includes. */
 #include <thread>
@@ -37,6 +38,8 @@ using namespace ViconDataStreamSDK::CPP;
 
 namespace ViconStream
 {
+    typedef std::function<void(const Client &)> viconstream_callback;
+
     class ViconStream;
 }
 
@@ -44,16 +47,41 @@ class ViconStream::ViconStream
 {
 
 private:
+    /** @brief Internal holder for a callback, including function pointer and
+     *         ID for deletion late. This has the drawback of allowing a max of
+     *         MAX_INT number of registrations / unregistrations. */
+    struct viconstream_callback_holder
+    {
+        viconstream_callback_holder(const unsigned int _id,
+                                    viconstream_callback _cb)
+            : id(_id), callback(_cb) { }
+
+        unsigned int id; /* Cannot be const since it is used in a vector and the
+                            default copy constructore will fail. */
+        viconstream_callback callback;
+    };
+
+    /** @brief Mutex for the ID counter and the callback list. */
+    std::mutex _id_cblock;
+
+    /** @brief ID counter for the removal of subscriptions. */
+    unsigned int _id;
+
+    /** @brief Vector holding the registered callbacks. */
+    std::vector<viconstream_callback_holder> callbacks;
+
     Client _vicon_client;
     std::string _host_name;
     std::chrono::high_resolution_clock::time_point _tp_start;
     std::ostream &_log;
     std::mutex _log_lock;
+
     std::thread _frame_grabber;
-    volatile bool shutdown;
+    volatile bool _shutdown;
 
     void logString(const std::string log);
-    void viconFrameGrabberWorker();
+    void frameGrabberWorker();
+    void callbackWorker();
 
 public:
     ViconStream(std::string hostname, std::ostream &log_output);
@@ -65,6 +93,24 @@ public:
                       StreamMode::Enum streamMode = StreamMode::ServerPush);
     void disableStream();
 
+    /**
+     * @brief   Register a callback for data received.
+     *
+     * @param[in] callback  The function to register.
+     * @note    Shall be of the form void(const Output_GetFrame).
+     *
+     * @return  Return the ID of the callback, is used for unregistration.
+     */
+    unsigned int registerCallback(viconstream_callback callback);
+
+    /**
+     * @brief   Unregister a callback from the queue.
+     *
+     * @param[in] id  The ID supplied from @p registerCallback.
+     *
+     * @return  Return true if the ID was deleted.
+     */
+    bool unregisterCallback(const unsigned int id);
 };
 
 #endif

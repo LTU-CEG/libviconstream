@@ -56,16 +56,43 @@ namespace ViconStream
         _log << "[" <<  res << "] ViconLog: " << log << std::endl;
     }
 
-    void ViconStream::viconFrameGrabberWorker()
+    void ViconStream::frameGrabberWorker()
     {
         logString("Frame grabber thread started!");
 
-        while (!shutdown)
+        Output_GetFrame f;
+
+        while (!_shutdown)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            /* Check so there is an active connection. */
+            if (_vicon_client.IsConnected().Connected)
+            {
+                f = _vicon_client.GetFrame();
+
+                if ((f.Result == Result::Success) &&
+                    (_vicon_client.GetFrameNumber().FrameNumber > 0))
+                {
+                    /* Since all information is stored in the Client object it
+                       will be passed by reference for the used to extract the
+                       needed data, but not to run more code in the callback.
+                    */
+                    std::lock_guard<std::mutex> locker(_id_cblock);
+
+                    for (auto &cb : callbacks)
+                        cb.callback(_vicon_client);
+                }
+                else
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            else
+            {
+                logString("Frame grabber is running but no connection... \
+                        Something is horribly working");
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
         }
     }
-
 
     /*********************************
      * Public members
@@ -75,11 +102,12 @@ namespace ViconStream
         : _host_name(hostname), _log(log_output)
     {
         _tp_start = std::chrono::high_resolution_clock::now();
-        shutdown = false;
     }
 
     ViconStream::~ViconStream()
     {
+        if (_shutdown == false)
+            disableStream();
     }
 
     bool ViconStream::enableStream(bool enableSegmentData,
@@ -88,6 +116,8 @@ namespace ViconStream
                                    bool enableDeviceData,
                                    StreamMode::Enum streamMode)
     {
+        _shutdown = false;
+
         logString("Connecting to " + _host_name + "...");
 
         int cnt = 0;
@@ -193,11 +223,6 @@ namespace ViconStream
             }
             else
             {
-                /* Wait a little to not overload the thread. */
-                std::this_thread::sleep_for(
-                    std::chrono::milliseconds(10)
-                );
-
                 /* Checking if end of look. */
                 if (i == 9)
                 {
@@ -211,16 +236,56 @@ namespace ViconStream
 
         /* Start the frame grabber/data pump thread. */
         logString("Starting the frame grabber thread...");
-        _frame_grabber = std::thread(&ViconStream::_frame_grabber, this);
+        _frame_grabber = std::thread(&ViconStream::frameGrabberWorker, this);
 
         return true;
     }
 
     void ViconStream::disableStream()
     {
+
         if (_vicon_client.IsConnected().Connected)
         {
+            logString("Terminating the frame grabber...");
+
+            _shutdown = true;
+            _frame_grabber.join();
+
+            logString("Frame grabber terminated!");
+
             _vicon_client.Disconnect();
+
+            logString("Connection to " + _host_name + " closed.");
         }
+
+    }
+
+    unsigned int ViconStream::registerCallback(viconstream_callback callback)
+    {
+        std::lock_guard<std::mutex> locker(_id_cblock);
+
+        /* Add the callback to the list. */
+        callbacks.emplace_back(viconstream_callback_holder(_id, callback));
+
+        return _id++;
+    }
+
+    bool ViconStream::unregisterCallback(const unsigned int id)
+    {
+        std::lock_guard<std::mutex> locker(_id_cblock);
+
+        /* Delete the callback with correct ID, a little ugly. */
+        for (unsigned int i = 0; i < callbacks.size(); i++)
+        {
+            if (callbacks[i].id == id)
+            {
+                callbacks.erase(callbacks.begin() + i);
+
+                return true;
+            }
+        }
+
+        /* No match, return false. */
+        return false;
     }
 }
