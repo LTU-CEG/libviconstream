@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 {
 
     /* Get an address to the Vicon system. */
-    std::string ip = "localhost:801";
+    std::string ip = "vicon.research.ltu.se:801";
 
     if(argc > 1)
         ip = argv[1];
