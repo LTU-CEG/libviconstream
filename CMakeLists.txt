@@ -30,6 +30,14 @@ project(viconstream)
 ########################################
 set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
 
+find_package(catkin REQUIRED)
+
+catkin_package(
+    LIBRARIES ${PROJECT_NAME}
+    INCLUDE_DIRS include
+    DEPENDS pthread
+)
+
 ########################################
 # Check the architecture
 ########################################
@@ -62,9 +70,10 @@ file(GLOB_RECURSE VICON_BLOC    ${VICON_SDK_PATH}/libboost_locale*)
 ########################################
 # Library linking and source
 ########################################
-add_library(viconstream SHARED viconstream.cpp)
+add_library(viconstream SHARED src/viconstream.cpp)
+include_directories(include)
 target_link_libraries(viconstream ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
-    ${VICON_BSYS} ${VICON_BLOC})
+    ${VICON_BSYS} ${VICON_BLOC} pthread)
 
 ########################################
 # Include the example in the build

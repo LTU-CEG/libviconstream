@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include <iostream>
-#include "../viconstream.h"
+#include "../include/viconstream.h"
 
 using namespace std;
 using namespace ViconDataStreamSDK::CPP;

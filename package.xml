@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>viconstream</name>
+  <version>1.0.0</version>
+  <description>
+    A library for communicating with a Vicon System.
+  </description>
+
+  <maintainer email="emil.fresk@gmail.com">Emil Fresk</maintainer>
+
+  <license>LGPLv3</license>
+
+  <author email="emil.fresk@gmail.com">Emil Fresk</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
