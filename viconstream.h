@@ -21,7 +21,6 @@
 /* Data includes. */
 #include <string>
 #include <vector>
-#include <queue>
 
 /* Threading includes. */
 #include <thread>
