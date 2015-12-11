@@ -87,7 +87,7 @@ namespace ViconStream
             else
             {
                 logString("Frame grabber is running but no connection... \
-                        Something is horribly working");
+                        Something is horribly wrong!");
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
@@ -154,56 +154,56 @@ namespace ViconStream
         if (enableSegmentData)
         {
             _vicon_client.EnableSegmentData();
-            logString("Segment Data enabled.");
+            logString("Segment Data:            enabled");
         }
         else
         {
             _vicon_client.DisableSegmentData();
-            logString("Segment Data disabled.");
+            logString("Segment Data:            disabled");
         }
 
         if (enableMarkerData)
         {
             _vicon_client.EnableMarkerData();
-            logString("Marker Data enabled.");
+            logString("Marker Data:             enabled");
         }
         else
         {
             _vicon_client.DisableMarkerData();
-            logString("Marker Data disabled.");
+            logString("Marker Data:             disabled");
         }
 
         if (enableUnlabeledMarkerData)
         {
             _vicon_client.EnableUnlabeledMarkerData();
-            logString("Unlabeled Marker Data enabled.");
+            logString("Unlabeled Marker Data:   enabled");
         }
         else
         {
             _vicon_client.DisableUnlabeledMarkerData();
-            logString("Unlabeled Marker Data disabled.");
+            logString("Unlabeled Marker Data:   disabled");
         }
 
         if (enableDeviceData)
         {
             _vicon_client.EnableDeviceData();
-            logString("Device Data enabled.");
+            logString("Device Data:             enabled");
         }
         else
         {
             _vicon_client.DisableDeviceData();
-            logString("Device Data disabled.");
+            logString("Device Data:             disabled");
         }
 
         /* Set stream mode */
         _vicon_client.SetStreamMode(streamMode);
 
         if (streamMode == StreamMode::ServerPush)
-            logString("Stream mode is ServerPush.");
+            logString("Stream mode:             ServerPush");
         else if (streamMode == StreamMode::ClientPull)
-            logString("Stream mode is ClientPull.");
+            logString("Stream mode:             ClientPull");
         else
-            logString("Stream mode is ClientPullPreFetch.");
+            logString("Stream mode:             ClientPullPreFetch");
 
         /* Set axis mapping (Z up) */
         _vicon_client.SetAxisMapping(Direction::Forward,
@@ -233,6 +233,10 @@ namespace ViconStream
                 }
             }
         }
+
+        std::stringstream s;
+        s << _vicon_client.GetFrameRate().FrameRateHz;
+        logString("Frame rate:              " + s.str() + " Hz") ;
 
         /* Start the frame grabber/data pump thread. */
         logString("Starting the frame grabber thread...");
