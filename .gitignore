@@ -3,6 +3,9 @@ tags
 
 # Ignore . files
 .*
+
+# Ignore folders
 test
 doc/html
 bin
+build
