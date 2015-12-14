@@ -20,7 +20,7 @@
 
 /* Data includes. */
 #include <string>
-#include <vector>
+#include <map>
 
 /* Threading includes. */
 #include <thread>
@@ -46,20 +46,6 @@ class ViconStream::ViconStream
 {
 
 private:
-    /** @brief Internal holder for a callback, including function pointer and
-     *         ID for deletion late. This has the drawback of allowing a max of
-     *         MAX_INT number of registrations / unregistrations. */
-    struct viconstream_callback_holder
-    {
-        viconstream_callback_holder(const unsigned int _id,
-                                    viconstream_callback _cb)
-            : id(_id), callback(_cb) { }
-
-        unsigned int id; /* Cannot be const since it is used in a vector and the
-                            default copy constructore will fail. */
-        viconstream_callback callback;
-    };
-
     /** @brief Mutex for the ID counter and the callback list. */
     std::mutex _id_cblock;
 
@@ -67,7 +53,7 @@ private:
     unsigned int _id;
 
     /** @brief Vector holding the registered callbacks. */
-    std::vector<viconstream_callback_holder> callbacks;
+    std::map<unsigned int, viconstream_callback> callbacks;
 
     Client _vicon_client;
     std::string _host_name;

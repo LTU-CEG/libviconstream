@@ -22,7 +22,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
-#include "viconstream.h"
+#include "../include/viconstream.h"
 
 
 namespace ViconStream
@@ -79,7 +79,7 @@ namespace ViconStream
                     std::lock_guard<std::mutex> locker(_id_cblock);
 
                     for (auto &cb : callbacks)
-                        cb.callback(_vicon_client);
+                        cb.second(_vicon_client);
                 }
                 else
                     std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -269,7 +269,7 @@ namespace ViconStream
         std::lock_guard<std::mutex> locker(_id_cblock);
 
         /* Add the callback to the list. */
-        callbacks.emplace_back(viconstream_callback_holder(_id, callback));
+        callbacks.emplace(_id, callback);
 
         return _id++;
     }
@@ -278,18 +278,11 @@ namespace ViconStream
     {
         std::lock_guard<std::mutex> locker(_id_cblock);
 
-        /* Delete the callback with correct ID, a little ugly. */
-        for (unsigned int i = 0; i < callbacks.size(); i++)
-        {
-            if (callbacks[i].id == id)
-            {
-                callbacks.erase(callbacks.begin() + i);
-
-                return true;
-            }
-        }
-
-        /* No match, return false. */
-        return false;
+        /* Delete the callback with correct ID. */
+        if (callbacks.erase(id) > 0)
+            return true;
+        else
+            /* No match, return false. */
+            return false;
     }
 }
