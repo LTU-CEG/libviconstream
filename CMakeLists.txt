@@ -24,19 +24,13 @@ cmake_minimum_required(VERSION 2.8.3)
 # Project name
 ########################################
 project(viconstream)
+find_package(catkin REQUIRED)
 
 ########################################
 # Enable C++14 and other C++ flags
 ########################################
 set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
 
-find_package(catkin REQUIRED)
-
-catkin_package(
-    LIBRARIES ${PROJECT_NAME}
-    INCLUDE_DIRS include
-    DEPENDS pthread
-)
 
 ########################################
 # Check the architecture
@@ -68,17 +62,41 @@ file(GLOB_RECURSE VICON_BSYS    ${VICON_SDK_PATH}/libboost_system*)
 file(GLOB_RECURSE VICON_BLOC    ${VICON_SDK_PATH}/libboost_locale*)
 
 ########################################
+# catkin requirements
+########################################
+catkin_package(
+    DEPENDS pthread
+    INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
+    LIBRARIES ${PROJECT_NAME} ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
+    ${VICON_BSYS} ${VICON_BLOC}
+)
+
+########################################
 # Library linking and source
 ########################################
-add_library(viconstream SHARED src/viconstream.cpp)
-include_directories(include)
-target_link_libraries(viconstream ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
-    ${VICON_BSYS} ${VICON_BLOC} pthread)
+include_directories(${catkin_INCLUDE_DIRS}
+                    include)
+
+add_library(${PROJECT_NAME}
+            src/viconstream.cpp)
+
+add_dependencies(${PROJECT_NAME}
+                 ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                 ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(${PROJECT_NAME}
+                      ${catkin_LIBRARIES}
+                      ${VICON_SDK}
+                      ${VICON_DEBUG}
+                      ${VICON_BUT}
+                      ${VICON_BSYS}
+                      ${VICON_BLOC}
+                      pthread)
 
 ########################################
 # Include the example in the build
 ########################################
-add_subdirectory(example)
+# add_subdirectory(example)
 
 ########################################
 # Messages
@@ -86,13 +104,13 @@ add_subdirectory(example)
 message(STATUS " ")
 message(STATUS "   Paths and variables")
 message(STATUS "  ---------------------")
-message(STATUS HOST_ARCH=${HOST_ARCH})
-message(STATUS VICON_SDK_PATH=${VICON_SDK_PATH})
-message(STATUS VICON_SDK=${VICON_SDK})
-message(STATUS VICON_DEBUG=${VICON_DEBUG})
-message(STATUS VICON_BTHREAD=${VICON_BTHREAD})
-message(STATUS VICON_BUT=${VICON_BUT})
-message(STATUS VICON_BSYS=${VICON_BSYS})
-message(STATUS VICON_BLOC=${VICON_BLOC})
+message(STATUS HOST_ARCH      = ${HOST_ARCH})
+message(STATUS VICON_SDK_PATH = ${VICON_SDK_PATH})
+message(STATUS VICON_SDK      = ${VICON_SDK})
+message(STATUS VICON_DEBUG    = ${VICON_DEBUG})
+message(STATUS VICON_BTHREAD  = ${VICON_BTHREAD})
+message(STATUS VICON_BUT      = ${VICON_BUT})
+message(STATUS VICON_BSYS     = ${VICON_BSYS})
+message(STATUS VICON_BLOC     = ${VICON_BLOC})
 message(STATUS " ")
 
