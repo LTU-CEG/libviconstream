@@ -22,7 +22,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
-#include "../include/viconstream.h"
+#include "viconstream/viconstream.h"
 
 
 namespace ViconStream
