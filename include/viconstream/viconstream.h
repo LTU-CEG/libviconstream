@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-* Copyright (C) 2015 Emil Fresk.
+* Copyright (C) 2015-2016 Emil Fresk.
 * All rights reserved.
 *
 * This file is part of the cppViconStream library.
