@@ -235,8 +235,17 @@ namespace ViconStream
         }
 
         std::stringstream s;
-        s << _vicon_client.GetFrameRate().FrameRateHz;
-        logString("Frame rate:              " + s.str() + " Hz") ;
+        Output_GetFrameRate framerate = _vicon_client.GetFrameRate();
+
+        if (framerate.Result == Result::Success)
+        {
+            s << _vicon_client.GetFrameRate().FrameRateHz;
+            logString("Frame rate:              " + s.str() + " Hz") ;
+        }
+        else
+        {
+            logString("Frame rate:              Unknown") ;
+        }
 
         /* Start the frame grabber/data pump thread. */
         logString("Starting the frame grabber thread...");
