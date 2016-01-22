@@ -24,12 +24,12 @@ cmake_minimum_required(VERSION 2.8.3)
 # Project name
 ########################################
 project(viconstream)
-find_package(catkin REQUIRED)
+find_package(catkin QUIET)
 
 ########################################
-# Enable C++14 and other C++ flags
+# Enable C++11 and other C++ flags
 ########################################
-set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 
 ########################################
@@ -64,12 +64,14 @@ file(GLOB_RECURSE VICON_BLOC    ${VICON_SDK_PATH}/libboost_locale*)
 ########################################
 # catkin requirements
 ########################################
-catkin_package(
-    DEPENDS pthread
-    INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
-    LIBRARIES ${PROJECT_NAME} ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
-    ${VICON_BSYS} ${VICON_BLOC}
-)
+if (catkin_FOUND)
+    catkin_package(
+        DEPENDS pthread
+        INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
+        LIBRARIES ${PROJECT_NAME} ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
+        ${VICON_BSYS} ${VICON_BLOC}
+    )
+endif()
 
 ########################################
 # Library linking and source
@@ -80,9 +82,11 @@ include_directories(${catkin_INCLUDE_DIRS}
 add_library(${PROJECT_NAME}
             src/viconstream.cpp)
 
-add_dependencies(${PROJECT_NAME}
-                 ${${PROJECT_NAME}_EXPORTED_TARGETS}
-                 ${catkin_EXPORTED_TARGETS})
+if (catkin_FOUND)
+    add_dependencies(${PROJECT_NAME}
+                     ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                     ${catkin_EXPORTED_TARGETS})
+endif()
 
 target_link_libraries(${PROJECT_NAME}
                       ${catkin_LIBRARIES}
