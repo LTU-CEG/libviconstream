@@ -61,6 +61,7 @@ namespace ViconStream
         logString("Frame grabber thread started!");
 
         Output_GetFrame f;
+        unsigned int framenumber, old_framenumber = 0;
 
         while (!_shutdown)
         {
@@ -68,10 +69,22 @@ namespace ViconStream
             if (_vicon_client.IsConnected().Connected)
             {
                 f = _vicon_client.GetFrame();
+                framenumber = _vicon_client.GetFrameNumber().FrameNumber;
 
                 if ((f.Result == Result::Success) &&
-                    (_vicon_client.GetFrameNumber().FrameNumber > 0))
+                    (framenumber > old_framenumber))
                 {
+                    const unsigned int df = framenumber - old_framenumber;
+
+                    /* Check if frames have been skipped.  */
+                    if (df > 1)
+                    {
+                        logString("Warning! " + std::to_string(df) +
+                                  " frames have been lost.");
+                    }
+
+                    old_framenumber = framenumber;
+
                     /* Since all information is stored in the Client object it
                        will be passed by reference for the used to extract the
                        needed data, but not to run more code in the callback.
@@ -110,11 +123,11 @@ namespace ViconStream
             disableStream();
     }
 
-    bool ViconStream::enableStream(bool enableSegmentData,
-                                   bool enableMarkerData,
-                                   bool enableUnlabeledMarkerData,
-                                   bool enableDeviceData,
-                                   StreamMode::Enum streamMode)
+    bool ViconStream::enableStream(const bool enableSegmentData,
+                                   const bool enableMarkerData,
+                                   const bool enableUnlabeledMarkerData,
+                                   const bool enableDeviceData,
+                                   const StreamMode::Enum streamMode)
     {
         _shutdown = false;
 
@@ -257,7 +270,7 @@ namespace ViconStream
     void ViconStream::disableStream()
     {
 
-        if (_vicon_client.IsConnected().Connected)
+        if (_vicon_client.IsConnected().Connected || !_shutdown)
         {
             logString("Terminating the frame grabber...");
 

@@ -118,11 +118,11 @@ public:
      *
      * @return  Returns true if the stream was started correctly.
      */
-    bool enableStream(bool enableSegmentData = true,
-                      bool enableMarkerData = false,
-                      bool enableUnlabeledMarkerData = false,
-                      bool enableDeviceData = false,
-                      StreamMode::Enum streamMode = StreamMode::ServerPush);
+    bool enableStream(const bool enableSegmentData = true,
+                      const bool enableMarkerData = false,
+                      const bool enableUnlabeledMarkerData = false,
+                      const bool enableDeviceData = false,
+                      const StreamMode::Enum streamMode = StreamMode::ServerPush);
 
     /**
      * @brief   Disabled the vicon stream.
