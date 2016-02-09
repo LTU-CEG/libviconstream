@@ -22,6 +22,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 #include "viconstream/viconstream.h"
 
 
@@ -62,6 +63,7 @@ namespace ViconStream
 
         Output_GetFrame f;
         unsigned int framenumber, old_framenumber = 0;
+        bool startup = true;
 
         while (!_shutdown)
         {
@@ -79,8 +81,11 @@ namespace ViconStream
                     /* Check if frames have been skipped.  */
                     if (df > 1)
                     {
-                        logString("Warning! " + std::to_string(df) +
-                                  " frames have been lost.");
+                        if (startup)
+                            startup = false;
+                        else
+                            logString("Warning! " + std::to_string(df - 1) +
+                                      " frames have been lost.");
                     }
 
                     old_framenumber = framenumber;
@@ -249,6 +254,13 @@ namespace ViconStream
 
         std::stringstream s;
         Output_GetFrameRate framerate = _vicon_client.GetFrameRate();
+
+        while (std::isinf(framerate.FrameRateHz) ||
+               std::isnan(framerate.FrameRateHz))
+        {
+            f = _vicon_client.GetFrame();
+            framerate = _vicon_client.GetFrameRate();
+        };
 
         if (framerate.Result == Result::Success)
         {
