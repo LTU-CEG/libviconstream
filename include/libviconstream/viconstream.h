@@ -20,14 +20,11 @@
 
 using namespace ViconDataStreamSDK::CPP;
 
-namespace ViconStream
+namespace libviconstream
 {
 typedef std::function< void(const Client &) > viconstream_callback;
 
-class ViconStream;
-}
-
-class ViconStream::ViconStream
+class arbiter
 {
 private:
   /** @brief Mutex for the ID counter and the callback list. */
@@ -45,7 +42,7 @@ private:
   /** @brief The vicon server's address. */
   std::string _host_name;
 
-  /** @brief Time since the ViconStream object was created. */
+  /** @brief Time since the arbiter object was created. */
   std::chrono::high_resolution_clock::time_point _tp_start;
 
   /** @brief Reference to the output stream for logging. */
@@ -65,7 +62,7 @@ private:
    *
    * @param[in] log   The string to be logged.
    */
-  void logString(const std::string log);
+  void logString(const std::string &log);
 
   /**
    * @brief   The frame grabber's worker function.
@@ -79,17 +76,17 @@ private:
 
 public:
   /**
-   * @brief   Constructor for the ViconStream.
+   * @brief   Constructor for the arbiter.
    *
    * @param[in] hostname   Address to the Vicon server.
    * @param[in] log_output Reference to the log output stream.
    */
-  ViconStream(std::string hostname, std::ostream &log_output);
+  arbiter(std::string hostname, std::ostream &log_output);
 
   /**
-   * @brief   Destructor handles the graceful exit of the ViconStream.
+   * @brief   Destructor handles the graceful exit of the arbiter.
    */
-  ~ViconStream();
+  ~arbiter();
 
   /**
    * @brief   Enables the Vicon stream and starts receiving data.
@@ -131,5 +128,7 @@ public:
    */
   bool unregisterCallback(const unsigned int id);
 };
+
+}  // end libviconstream
 
 #endif

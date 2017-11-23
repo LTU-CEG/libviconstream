@@ -4,7 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #include <iostream>
-#include "../include/viconstream.h"
+#include "libviconstream/viconstream.h"
 
 using namespace std;
 using namespace ViconDataStreamSDK::CPP;

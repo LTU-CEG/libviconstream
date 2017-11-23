@@ -8,15 +8,15 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-#include "viconstream/viconstream.h"
+#include "libviconstream/viconstream.h"
 
-namespace ViconStream
+namespace libviconstream
 {
 /*********************************
  * Private members
  ********************************/
 
-void ViconStream::logString(const std::string log)
+void arbiter::logString(const std::string &log)
 {
   /* Check the execution time. */
   auto tp   = std::chrono::high_resolution_clock::now();
@@ -42,7 +42,7 @@ void ViconStream::logString(const std::string log)
   _log << "[" << res << "] ViconLog: " << log << std::endl;
 }
 
-void ViconStream::frameGrabberWorker()
+void arbiter::frameGrabberWorker()
 {
   logString("Frame grabber thread started!");
 
@@ -101,23 +101,23 @@ void ViconStream::frameGrabberWorker()
  * Public members
  ********************************/
 
-ViconStream::ViconStream(std::string hostname, std::ostream &log_output)
+arbiter::arbiter(std::string hostname, std::ostream &log_output)
     : _host_name(hostname), _log(log_output)
 {
   _tp_start = std::chrono::high_resolution_clock::now();
 }
 
-ViconStream::~ViconStream()
+arbiter::~arbiter()
 {
   if (_shutdown == false)
     disableStream();
 }
 
-bool ViconStream::enableStream(const bool enableSegmentData,
-                               const bool enableMarkerData,
-                               const bool enableUnlabeledMarkerData,
-                               const bool enableDeviceData,
-                               const StreamMode::Enum streamMode)
+bool arbiter::enableStream(const bool enableSegmentData,
+                           const bool enableMarkerData,
+                           const bool enableUnlabeledMarkerData,
+                           const bool enableDeviceData,
+                           const StreamMode::Enum streamMode)
 {
   _shutdown = false;
 
@@ -257,12 +257,12 @@ bool ViconStream::enableStream(const bool enableSegmentData,
 
   /* Start the frame grabber/data pump thread. */
   logString("Starting the frame grabber thread...");
-  _frame_grabber = std::thread(&ViconStream::frameGrabberWorker, this);
+  _frame_grabber = std::thread(&arbiter::frameGrabberWorker, this);
 
   return true;
 }
 
-void ViconStream::disableStream()
+void arbiter::disableStream()
 {
   if (_vicon_client.IsConnected().Connected || !_shutdown)
   {
@@ -279,7 +279,7 @@ void ViconStream::disableStream()
   }
 }
 
-unsigned int ViconStream::registerCallback(viconstream_callback callback)
+unsigned int arbiter::registerCallback(viconstream_callback callback)
 {
   std::lock_guard< std::mutex > locker(_id_cblock);
 
@@ -289,7 +289,7 @@ unsigned int ViconStream::registerCallback(viconstream_callback callback)
   return _id++;
 }
 
-bool ViconStream::unregisterCallback(const unsigned int id)
+bool arbiter::unregisterCallback(const unsigned int id)
 {
   std::lock_guard< std::mutex > locker(_id_cblock);
 
@@ -300,4 +300,5 @@ bool ViconStream::unregisterCallback(const unsigned int id)
     /* No match, return false. */
     return false;
 }
-}
+
+} // end libviconstream
