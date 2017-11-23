@@ -1,16 +1,17 @@
-# A C++ library for a Vicon System
+# A C++ library for a Vicon Motion Capture System
 
 ## Contributors
 
-* Emil Fresk
+* [Emil Fresk](https://www.github.com/korken89)
 
 ---
 
 ## License
 
-Licensed under the LGPL-v3 license, see LICENSE file for details.
+Licensed under the Boost Software License 1.0, see LICENSE file for details.
 
 ---
 
-Port of the ViconStream class form C#.
+A simple library for communicating with a Vicon Motion Capture System.
+
 * Simple to use, see example file.
