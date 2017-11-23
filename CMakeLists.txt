@@ -66,7 +66,7 @@ file(GLOB_RECURSE VICON_BLOC    ${VICON_SDK_PATH}/libboost_locale*)
 ########################################
 if (catkin_FOUND)
     catkin_package(
-        DEPENDS pthread
+      #DEPENDS pthread
         INCLUDE_DIRS ${catkin_INCLUDE_DIRS} include
         LIBRARIES ${PROJECT_NAME} ${VICON_SDK} ${VICON_DEBUG} ${VICON_BUT}
         ${VICON_BSYS} ${VICON_BLOC}
