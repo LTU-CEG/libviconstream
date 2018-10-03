@@ -6,6 +6,7 @@
 /* Data includes. */
 #include <string>
 #include <map>
+#include <functional>
 
 /* Threading includes. */
 #include <thread>
